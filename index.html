@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Life RPG">
+    <title>🎮 Life RPG</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #fff;
+            padding-bottom: 80px;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(10px);
+        }
+        
+        .level-badge {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .points-display {
+            font-size: 20px;
+            margin-top: 5px;
+        }
+        
+        .tab-nav {
+            display: flex;
+            background: rgba(0,0,0,0.2);
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+        }
+        
+        .tab-btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            color: rgba(255,255,255,0.6);
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn.active {
+            color: #fff;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .edit-stat-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 20px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .stat-name {
+            font-size: 20px;
+            font-weight: 600;
+        }
+        
+        .stat-level {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+        
+        .progress-bar {
+            background: rgba(0,0,0,0.3);
+            height: 30px;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #4ade80, #22c55e);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+        
+        .quest-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .quest-item.completed {
+            opacity: 0.5;
+        }
+        
+        .checkbox {
+            width: 28px;
+            height: 28px;
+            border: 3px solid #fff;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            cursor: pointer;
+        }
+        
+        .checkbox.checked {
+            background: #22c55e;
+            border-color: #22c55e;
+        }
+        
+        .checkbox.checked::after {
+            content: '✓';
+            color: white;
+            font-weight: bold;
+            font-size: 20px;
+        }
+        
+        .quest-info {
+            flex: 1;
+            min-width: 0;
+        }
+        
+        .quest-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .quest-xp {
+            background: #fbbf24;
+            color: #000;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+        }
+        
+        .btn {
+            background: #22c55e;
+            color: white;
+            border: none;
+            padding: 15px 24px;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .btn-secondary {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .achievement {
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .achievement.unlocked {
+            border: 2px solid #ffd700;
+            background: rgba(255,215,0,0.2);
+        }
+        
+        .achievement-icon {
+            font-size: 48px;
+            flex-shrink: 0;
+        }
+        
+        .achievement-info {
+            flex: 1;
+        }
+        
+        .achievement-name {
+            font-weight: 600;
+            font-size: 18px;
+            margin-bottom: 4px;
+        }
+        
+        .reward-item {
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .reward-item.claimed {
+            opacity: 0.5;
+        }
+        
+        .reward-info {
+            flex: 1;
+        }
+        
+        .reward-name {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        
+        .reward-cost {
+            background: #fbbf24;
+            color: #000;
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            padding: 20px;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 400px;
+            width: 100%;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .input-group {
+            margin-bottom: 15px;
+        }
+        
+        .input-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 10px;
+            background: rgba(255,255,255,0.1);
+            color: #fff;
+            font-size: 16px;
+        }
+        
+        .input::placeholder {
+            color: rgba(255,255,255,0.5);
+        }
+        
+        select.input {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='white' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 40px;
+        }
+        
+        .btn-row {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-row .btn {
+            flex: 1;
+        }
+        
+        .streak-badge {
+            background: linear-gradient(135deg, #f97316, #fb923c);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .streak-number {
+            font-size: 48px;
+            font-weight: bold;
+        }
+        
+        .delete-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="level-badge">⭐ Рівень <span id="overallLevel">1</span></div>
+        <div class="points-display">💎 <span id="pointsDisplay">0</span> поінтів</div>
+    </div>
+
+    <!-- Квести -->
+    <div class="tab-content active" id="questsTab">
+        <div class="streak-badge">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 5px;">🔥 Streak</div>
+            <div class="streak-number"><span id="streakDays">0</span> днів</div>
+        </div>
+
+        <div id="statsList"></div>
+        
+        <button class="btn" onclick="openQuestModal()">➕ Додати квест</button>
+        
+        <div id="questsList"></div>
+    </div>
+
+    <!-- Досягнення -->
+    <div class="tab-content" id="achievementsTab">
+        <button class="btn" onclick="openAchievementModal()">➕ Додати досягнення</button>
+        <div id="achievementsList"></div>
+    </div>
+
+    <!-- Нагороди -->
+    <div class="tab-content" id="rewardsTab">
+        <button class="btn" onclick="openRewardModal()">➕ Додати нагороду</button>
+        <div id="rewardsList"></div>
+    </div>
+
+    <!-- Налаштування -->
+    <div class="tab-content" id="settingsTab">
+        <h2 style="margin-bottom: 20px;">⚙️ Налаштування категорій</h2>
+        <button class="btn" onclick="openCategoryModal()">➕ Додати категорію</button>
+        <div id="categoriesList"></div>
+    </div>
+
+    <!-- Навігація -->
+    <div class="tab-nav">
+        <button class="tab-btn active" onclick="switchTab('quests')">⚔️</button>
+        <button class="tab-btn" onclick="switchTab('achievements')">🏆</button>
+        <button class="tab-btn" onclick="switchTab('rewards')">🎁</button>
+        <button class="tab-btn" onclick="switchTab('settings')">⚙️</button>
+    </div>
+
+    <!-- Модалка квесту -->
+    <div class="modal" id="questModal">
+        <div class="modal-content">
+            <div class="modal-title">Новий квест</div>
+            <div class="input-group">
+                <label class="input-label">Назва</label>
+                <input type="text" class="input" id="questName" placeholder="Тренування 30 хв">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Категорія</label>
+                <select class="input" id="questCategory">
+                    <option value="health">🏃 Health</option>
+                    <option value="wealth">💰 Wealth</option>
+                    <option value="knowledge">📚 Knowledge</option>
+                    <option value="work">💼 Work</option>
+                </select>
+            </div>
+            <div class="input-group">
+                <label class="input-label">XP нагорода</label>
+                <input type="number" class="input" id="questXP" placeholder="25" value="25">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModal('questModal')">Скасувати</button>
+                <button class="btn" onclick="addQuest()">Додати</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка досягнення -->
+    <div class="modal" id="achievementModal">
+        <div class="modal-content">
+            <div class="modal-title">Нове досягнення</div>
+            <div class="input-group">
+                <label class="input-label">Назва</label>
+                <input type="text" class="input" id="achName" placeholder="Week Warrior">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Опис</label>
+                <input type="text" class="input" id="achDesc" placeholder="7 днів streak">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Емоджі</label>
+                <input type="text" class="input" id="achIcon" placeholder="🔥" maxlength="2">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModal('achievementModal')">Скасувати</button>
+                <button class="btn" onclick="addAchievement()">Додати</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка нагороди -->
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-title">Нова нагорода</div>
+            <div class="input-group">
+                <label class="input-label">Що купуєш?</label>
+                <input type="text" class="input" id="rewardName" placeholder="Нова гра">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Ціна (поінти)</label>
+                <input type="number" class="input" id="rewardCost" placeholder="50" value="50">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModal('rewardModal')">Скасувати</button>
+                <button class="btn" onclick="addReward()">Додати</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модалка категорії -->
+    <div class="modal" id="categoryModal">
+        <div class="modal-content">
+            <div class="modal-title">Нова категорія</div>
+            <div class="input-group">
+                <label class="input-label">Назва (англійською, без пробілів)</label>
+                <input type="text" class="input" id="categoryKey" placeholder="fitness">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Назва для відображення</label>
+                <input type="text" class="input" id="categoryName" placeholder="Фітнес">
+            </div>
+            <div class="input-group">
+                <label class="input-label">Емоджі</label>
+                <input type="text" class="input" id="categoryIcon" placeholder="💪" maxlength="2">
+            </div>
+            <div class="btn-row">
+                <button class="btn btn-secondary" onclick="closeModal('categoryModal')">Скасувати</button>
+                <button class="btn" onclick="addCategory()">Додати</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Дані гри
+        let gameData = {
+            stats: {
+                health: { level: 1, xp: 0 },
+                wealth: { level: 1, xp: 0 },
+                knowledge: { level: 1, xp: 0 },
+                work: { level: 1, xp: 0 }
+            },
+            categories: {
+                health: { name: 'Health', icon: '🏃' },
+                wealth: { name: 'Wealth', icon: '💰' },
+                knowledge: { name: 'Knowledge', icon: '📚' },
+                work: { name: 'Work', icon: '💼' }
+            },
+            points: 0,
+            streak: 0,
+            lastActiveDate: null,
+            quests: [],
+            achievements: [],
+            rewards: []
+        };
+
+        // Завантажити дані
+        function loadData() {
+            const saved = localStorage.getItem('lifeRPG');
+            if (saved) {
+                gameData = JSON.parse(saved);
+                checkStreak();
+            }
+        }
+
+        // Зберегти дані
+        function saveData() {
+            localStorage.setItem('lifeRPG', JSON.stringify(gameData));
+        }
+
+        // Перевірка streak
+        function checkStreak() {
+            const today = new Date().toDateString();
+            if (gameData.lastActiveDate === today) return;
+            
+            if (gameData.lastActiveDate) {
+                const last = new Date(gameData.lastActiveDate);
+                const current = new Date(today);
+                const diff = (current - last) / (1000 * 60 * 60 * 24);
+                
+                if (diff === 1) {
+                    gameData.streak++;
+                } else if (diff > 1) {
+                    gameData.streak = 0;
+                }
+            }
+            
+            gameData.lastActiveDate = today;
+            saveData();
+        }
+
+        // Розрахунок рівня
+        function calcLevel(xp) {
+            let level = 1;
+            let needed = 100;
+            let current = xp;
+            
+            while (current >= needed) {
+                current -= needed;
+                level++;
+                needed = level * 100;
+            }
+            
+            return { level, current, needed };
+        }
+
+        // Додати XP
+        function addXP(category, amount) {
+            gameData.stats[category].xp += amount;
+            
+            const { level } = calcLevel(gameData.stats[category].xp);
+            if (level > gameData.stats[category].level) {
+                gameData.stats[category].level = level;
+                setTimeout(() => alert(`🎉 LEVEL UP! ${category.toUpperCase()} → рівень ${level}!`), 300);
+            }
+            
+            saveData();
+            render();
+        }
+
+        // Виконати квест
+        function completeQuest(id) {
+            const quest = gameData.quests.find(q => q.id === id);
+            if (!quest || quest.completed) return;
+            
+            quest.completed = true;
+            gameData.points++;
+            addXP(quest.category, quest.xp);
+            checkStreak();
+        }
+
+        // Відкрити модалку
+        function openQuestModal() {
+            updateCategoryOptions();
+            document.getElementById('questModal').classList.add('active');
+        }
+
+        function openAchievementModal() {
+            document.getElementById('achievementModal').classList.add('active');
+        }
+
+        function openRewardModal() {
+            document.getElementById('rewardModal').classList.add('active');
+        }
+
+        function openCategoryModal() {
+            document.getElementById('categoryModal').classList.add('active');
+        }
+
+        // Оновити опції категорій в селекті
+        function updateCategoryOptions() {
+            const select = document.getElementById('questCategory');
+            select.innerHTML = Object.keys(gameData.categories).map(key => {
+                const cat = gameData.categories[key];
+                return `<option value="${key}">${cat.icon} ${cat.name}</option>`;
+            }).join('');
+        }
+
+        // Додати категорію
+        function addCategory() {
+            const key = document.getElementById('categoryKey').value.toLowerCase().replace(/\s/g, '');
+            const name = document.getElementById('categoryName').value;
+            const icon = document.getElementById('categoryIcon').value;
+            
+            if (!key || !name) return alert('Заповни всі поля');
+            if (gameData.categories[key]) return alert('Така категорія вже є');
+            
+            gameData.categories[key] = { name, icon: icon || '⭐' };
+            gameData.stats[key] = { level: 1, xp: 0 };
+            
+            document.getElementById('categoryKey').value = '';
+            document.getElementById('categoryName').value = '';
+            document.getElementById('categoryIcon').value = '';
+            closeModal('categoryModal');
+            saveData();
+            render();
+        }
+
+        // Видалити категорію
+        function deleteCategory(key) {
+            if (['health', 'wealth', 'knowledge', 'work'].includes(key)) {
+                return alert('Не можна видалити базові категорії');
+            }
+            
+            if (confirm(`Видалити категорію "${gameData.categories[key].name}"?`)) {
+                delete gameData.categories[key];
+                delete gameData.stats[key];
+                // Видалити квести цієї категорії
+                gameData.quests = gameData.quests.filter(q => q.category !== key);
+                saveData();
+                render();
+            }
+        }
+
+        // Закрити модалку
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        // Додати квест
+        function addQuest() {
+            const name = document.getElementById('questName').value;
+            const category = document.getElementById('questCategory').value;
+            const xp = parseInt(document.getElementById('questXP').value) || 25;
+            
+            if (!name) return alert('Введи назву квесту');
+            
+            gameData.quests.push({
+                id: Date.now(),
+                name,
+                category,
+                xp,
+                completed: false
+            });
+            
+            document.getElementById('questName').value = '';
+            closeModal('questModal');
+            saveData();
+            render();
+        }
+
+        // Додати досягнення
+        function addAchievement() {
+            const name = document.getElementById('achName').value;
+            const desc = document.getElementById('achDesc').value;
+            const icon = document.getElementById('achIcon').value;
+            
+            if (!name) return alert('Введи назву');
+            
+            gameData.achievements.push({
+                id: Date.now(),
+                name,
+                desc,
+                icon: icon || '🏆',
+                unlocked: false
+            });
+            
+            document.getElementById('achName').value = '';
+            document.getElementById('achDesc').value = '';
+            document.getElementById('achIcon').value = '';
+            closeModal('achievementModal');
+            saveData();
+            render();
+        }
+
+        // Додати нагороду
+        function addReward() {
+            const name = document.getElementById('rewardName').value;
+            const cost = parseInt(document.getElementById('rewardCost').value) || 50;
+            
+            if (!name) return alert('Введи назву');
+            
+            gameData.rewards.push({
+                id: Date.now(),
+                name,
+                cost,
+                claimed: false
+            });
+            
+            document.getElementById('rewardName').value = '';
+            closeModal('rewardModal');
+            saveData();
+            render();
+        }
+
+        // Розблокувати досягнення
+        function unlockAchievement(id) {
+            const ach = gameData.achievements.find(a => a.id === id);
+            if (!ach || ach.unlocked) return;
+            
+            ach.unlocked = true;
+            setTimeout(() => alert(`🏆 ДОСЯГНЕННЯ: ${ach.name}!`), 300);
+            saveData();
+            render();
+        }
+
+        // Купити нагороду
+        function claimReward(id) {
+            const reward = gameData.rewards.find(r => r.id === id);
+            if (!reward || reward.claimed) return;
+            
+            if (gameData.points < reward.cost) {
+                return alert(`Не вистачає поінтів! Потрібно: ${reward.cost}, є: ${gameData.points}`);
+            }
+            
+            if (confirm(`Купити "${reward.name}" за ${reward.cost} поінтів?`)) {
+                reward.claimed = true;
+                gameData.points -= reward.cost;
+                saveData();
+                render();
+                alert(`🎉 Куплено: ${reward.name}!`);
+            }
+        }
+
+        // Видалити квест
+        function deleteQuest(id) {
+            if (confirm('Видалити цей квест?')) {
+                gameData.quests = gameData.quests.filter(q => q.id !== id);
+                saveData();
+                render();
+            }
+        }
+
+        // Видалити досягнення
+        function deleteAchievement(id) {
+            if (confirm('Видалити це досягнення?')) {
+                gameData.achievements = gameData.achievements.filter(a => a.id !== id);
+                saveData();
+                render();
+            }
+        }
+
+        // Видалити нагороду
+        function deleteReward(id) {
+            if (confirm('Видалити цю нагороду?')) {
+                gameData.rewards = gameData.rewards.filter(r => r.id !== id);
+                saveData();
+                render();
+            }
+        }
+
+        // Перемкнути таб
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            
+            document.getElementById(tab + 'Tab').classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        // Рендер
+        function render() {
+            // Overall level
+            const avgLevel = Math.round(
+                (gameData.stats.health.level + gameData.stats.wealth.level + 
+                 gameData.stats.knowledge.level + gameData.stats.work.level) / 4
+            );
+            document.getElementById('overallLevel').textContent = avgLevel;
+            document.getElementById('pointsDisplay').textContent = gameData.points;
+            document.getElementById('streakDays').textContent = gameData.streak;
+            
+            // Stats
+            document.getElementById('statsList').innerHTML = Object.keys(gameData.stats).map(stat => {
+                const cat = gameData.categories[stat] || { name: stat, icon: '⭐' };
+                const { level, current, needed } = calcLevel(gameData.stats[stat].xp);
+                const progress = (current / needed) * 100;
+                
+                return `
+                    <div class="stat-card">
+                        <div class="stat-header">
+                            <span class="stat-name">${cat.icon} ${cat.name}</span>
+                            <span class="stat-level">Lvl ${level}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${progress}%">${Math.round(progress)}%</div>
+                        </div>
+                        <div style="font-size: 14px; opacity: 0.8;">${current} / ${needed} XP</div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Quests
+            document.getElementById('questsList').innerHTML = gameData.quests.length ? 
+                gameData.quests.map(q => `
+                    <div class="quest-item ${q.completed ? 'completed' : ''}" onclick="completeQuest(${q.id})">
+                        <div class="checkbox ${q.completed ? 'checked' : ''}"></div>
+                        <div class="quest-info">
+                            <div class="quest-name">${q.name}</div>
+                        </div>
+                        <div class="quest-xp">+${q.xp}</div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteQuest(${q.id})">🗑️</button>
+                    </div>
+                `).join('') : '<div style="text-align: center; opacity: 0.6; padding: 40px 20px;">Додай перший квест!</div>';
+            
+            // Achievements
+            document.getElementById('achievementsList').innerHTML = gameData.achievements.length ?
+                gameData.achievements.map(a => `
+                    <div class="achievement ${a.unlocked ? 'unlocked' : ''}" onclick="${!a.unlocked ? `unlockAchievement(${a.id})` : ''}">
+                        <div class="achievement-icon">${a.icon}</div>
+                        <div class="achievement-info">
+                            <div class="achievement-name">${a.name}</div>
+                            <div style="font-size: 14px; opacity: 0.8;">${a.desc}</div>
+                        </div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteAchievement(${a.id})">🗑️</button>
+                    </div>
+                `).join('') : '<div style="text-align: center; opacity: 0.6; padding: 40px 20px;">Додай перше досягнення!</div>';
+            
+            // Rewards
+            document.getElementById('rewardsList').innerHTML = gameData.rewards.length ?
+                gameData.rewards.map(r => `
+                    <div class="reward-item ${r.claimed ? 'claimed' : ''}" onclick="${!r.claimed ? `claimReward(${r.id})` : ''}">
+                        <div class="reward-info">
+                            <div class="reward-name">${r.name}</div>
+                            ${r.claimed ? '<div style="font-size: 12px; color: #4ade80;">✓ Куплено</div>' : ''}
+                        </div>
+                        <div class="reward-cost">${r.cost} 💎</div>
+                        <button class="delete-btn" onclick="event.stopPropagation(); deleteReward(${r.id})">🗑️</button>
+                    </div>
+                `).join('') : '<div style="text-align: center; opacity: 0.6; padding: 40px 20px;">Додай першу нагороду!</div>';
+            
+            // Categories
+            document.getElementById('categoriesList').innerHTML = Object.keys(gameData.categories).map(key => {
+                const cat = gameData.categories[key];
+                const isDefault = ['health', 'wealth', 'knowledge', 'work'].includes(key);
+                return `
+                    <div class="stat-card">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-size: 24px; margin-bottom: 5px;">${cat.icon}</div>
+                                <div style="font-weight: 600;">${cat.name}</div>
+                                <div style="font-size: 12px; opacity: 0.6; margin-top: 3px;">ID: ${key}</div>
+                            </div>
+                            ${!isDefault ? `<button class="delete-btn" onclick="deleteCategory('${key}')">🗑️</button>` : '<div style="font-size: 12px; opacity: 0.5;">Базова</div>'}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Ініціалізація
+        loadData();
+        render();
+
+        // Закрити модалку при кліку поза нею
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>
